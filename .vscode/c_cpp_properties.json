@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/local/include",
+                "/usr/local/Cellar/freeglut/3.6.0/include/GL",
+                "/usr/local/Cellar/glew/2.2.0_1/include/GL",
+                "/usr/local/Cellar/emscripten/main/system/include"
+            ],
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ],
+            "intelliSenseMode": "macos-clang-x64",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
