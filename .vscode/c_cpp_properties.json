@@ -4,9 +4,10 @@
             "name": "Mac",
             "includePath": [
                 "/usr/local/include",
-                "/usr/local/Cellar/freeglut/3.6.0/include/GL",
-                "/usr/local/Cellar/glew/2.2.0_1/include/GL",
-                "/usr/local/Cellar/emscripten/main/system/include"
+                "/usr/local/Cellar/emscripten/main/system/include",
+                "/usr/local/Cellar/emscripten/main/system/include/GL",
+                "/usr/local/Cellar/emscripten/main/system/include/stb",
+                "/usr/local/Cellar/emscripten/main/system/include/stb"
             ],
             "macFrameworkPath": [
                 "/System/Library/Frameworks",

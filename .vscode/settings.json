@@ -49,6 +49,10 @@
     "optional": "cpp",
     "unordered_map": "cpp",
     "vector": "cpp",
-    "emsdk": "cpp"
+    "emsdk": "cpp",
+    "chrono": "cpp",
+    "random": "cpp",
+    "cfenv": "cpp",
+    "charconv": "cpp"
   }
 }
