@@ -27,8 +27,8 @@ using namespace chrono;
 const char fontTexturePath[25] = "web/res/font_texture.png";
 const char snakeTexturePath[27] = "web/res/snake-graphics.png";
 // Constants
-const int columns = 60;
-const int rows = 60;
+const int columns = 50;
+const int rows = 50;
 const int frame_rate = 30;
 int snakeSpeed = 10;
 float snakeWidth, snakeHeight;
@@ -82,8 +82,36 @@ float getRandomCoord()
 
 void placeFruit()
 {
-  fruitX = getRandomCoord();
-  fruitY = getRandomCoord();
+  bool valid = false;
+  while (!valid)
+  {
+    // Get a random position
+    float ax = getRandomCoord();
+    float ay = getRandomCoord();
+
+    // Make sure the snake doesn't overlap the new apple
+    bool overlap = false;
+    for (int i = 0; i < snakeBody.size(); i++)
+    {
+      // Get the position of the current snake segment
+      float sx = snakeBody[i].x;
+      float sy = snakeBody[i].y;
+
+      // Check overlap
+      if (ax >= sx & ax <= (sx + snakeWidth) && ay >= sy & ay <= (sy + snakeHeight))
+      {
+        overlap = true;
+        break;
+      }
+    }
+
+    if (!overlap)
+    {
+      fruitX = ax;
+      fruitY = ay;
+      valid = true;
+    }
+  }
 }
 
 // Movement Logic
@@ -238,123 +266,6 @@ GLuint createProgram()
   return program;
 }
 
-// // Loop over every snake segment
-// for (var i = 0; i < snake.segments.length; i++)
-// {
-//   var segment = snake.segments[i];
-//   var segx = segment.x;
-//   var segy = segment.y;
-//   var tilex = segx * level.tilewidth;
-//   var tiley = segy * level.tileheight;
-
-//   // Sprite column and row that gets calculated
-//   var tx = 0;
-//   var ty = 0;
-
-//   if (i == 0)
-//   {
-//     // Head; Determine the correct image
-//     var nseg = snake.segments[i + 1]; // Next segment
-//     if (segy < nseg.y)
-//     {
-//       // Up
-//       tx = 3;
-//       ty = 0;
-//     }
-//     else if (segx > nseg.x)
-//     {
-//       // Right
-//       tx = 4;
-//       ty = 0;
-//     }
-//     else if (segy > nseg.y)
-//     {
-//       // Down
-//       tx = 4;
-//       ty = 1;
-//     }
-//     else if (segx < nseg.x)
-//     {
-//       // Left
-//       tx = 3;
-//       ty = 1;
-//     }
-//   }
-//   else if (i == snake.segments.length - 1)
-//   {
-//     // Tail; Determine the correct image
-//     var pseg = snake.segments[i - 1]; // Prev segment
-//     if (pseg.y < segy)
-//     {
-//       // Up
-//       tx = 3;
-//       ty = 2;
-//     }
-//     else if (pseg.x > segx)
-//     {
-//       // Right
-//       tx = 4;
-//       ty = 2;
-//     }
-//     else if (pseg.y > segy)
-//     {
-//       // Down
-//       tx = 4;
-//       ty = 3;
-//     }
-//     else if (pseg.x < segx)
-//     {
-//       // Left
-//       tx = 3;
-//       ty = 3;
-//     }
-//   }
-//   else
-//   {
-//     // Body; Determine the correct image
-//     var pseg = snake.segments[i - 1]; // Previous segment
-//     var nseg = snake.segments[i + 1]; // Next segment
-//     if (pseg.x < segx && nseg.x > segx || nseg.x < segx && pseg.x > segx)
-//     {
-//       // Horizontal Left-Right
-//       tx = 1;
-//       ty = 0;
-//     }
-//     else if (pseg.x < segx && nseg.y > segy || nseg.x < segx && pseg.y > segy)
-//     {
-//       // Angle Left-Down
-//       tx = 2;
-//       ty = 0;
-//     }
-//     else if (pseg.y < segy && nseg.y > segy || nseg.y < segy && pseg.y > segy)
-//     {
-//       // Vertical Up-Down
-//       tx = 2;
-//       ty = 1;
-//     }
-//     else if (pseg.y < segy && nseg.x < segx || nseg.y < segy && pseg.x < segx)
-//     {
-//       // Angle Top-Left
-//       tx = 2;
-//       ty = 2;
-//     }
-//     else if (pseg.x > segx && nseg.y < segy || nseg.x > segx && pseg.y < segy)
-//     {
-//       // Angle Right-Up
-//       tx = 0;
-//       ty = 1;
-//     }
-//     else if (pseg.y > segy && nseg.x > segx || nseg.y > segy && pseg.x > segx)
-//     {
-//       // Angle Down-Right
-//       tx = 0;
-//       ty = 0;
-//     }
-//   }
-
-//   // Draw the image of the snake part
-//   context.drawImage(tileimage, tx * 64, ty * 64, 64, 64, tilex, tiley,
-//                     level.tilewidth, level.tileheight);
 void drawSquare(GLuint program, float x, float y, float size, float r, float g, float b)
 {
   float vertices[] = {
@@ -463,162 +374,157 @@ void renderText(GLuint program, GLuint texture, const string &text, float x, flo
   }
 }
 
-void drawTexturedSquare(GLuint program, GLuint texture)
+void drawTexturedSquare(GLuint program, GLuint texture, float x, float y, int i)
 {
   glUseProgram(program);
   glBindTexture(GL_TEXTURE_2D, texture);
   glDepthMask(GL_TRUE);
-  glBlendFunc(GL_TEXTURE_2D, GL_TEXTURE_ALPHA_TYPE);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   float charWidth = 1.0f / 5.0f; // Assuming 16x16 grid of characters
   float charHeight = 1.0f / 4.0f;
 
-  for (size_t i = 0; i < snakeBody.size(); ++i)
+  float segx = x;
+  float segy = y;
+
+  // Sprite column and row that gets calculated
+  int tx = 0;
+  int ty = 0;
+
+  if (i == 0)
   {
-    const auto segment = snakeBody[i];
-    // drawSquare(program, segment.x, segment.y, snakeWidth, 1.0f, 1.0f, 1.0f);
-
-    float segx = segment.x;
-    float segy = segment.y;
-
-    // Sprite column and row that gets calculated
-    int tx = 0;
-    int ty = 0;
-
-    if (i == 0)
+    // Head; Determine the correct image
+    auto nseg = snakeBody[i + 1]; // Next segment
+    if (segy > nseg.y)
     {
-      // Head; Determine the correct image
-      auto nseg = snakeBody[i + 1]; // Next segment
-      if (segy > nseg.y)
-      {
-        // Up
-        tx = 3;
-        ty = 0;
-      }
-      else if (segx > nseg.x)
-      {
-        // Right
-        tx = 4;
-        ty = 0;
-      }
-      else if (segy < nseg.y)
-      {
-        // Down
-        tx = 4;
-        ty = 1;
-      }
-      else if (segx < nseg.x)
-      {
-        // Left
-        tx = 3;
-        ty = 1;
-      }
+      // Up
+      tx = 3;
+      ty = 0;
     }
-    else if (i == snakeBody.size() - 1)
+    else if (segx > nseg.x)
     {
-      // Tail; Determine the correct image
-      auto pseg = snakeBody[i - 1]; // Prev segment
-      if (pseg.y > segy)
-      {
-        // Up
-        tx = 3;
-        ty = 2;
-      }
-      else if (pseg.x > segx)
-      {
-        // Right
-        tx = 4;
-        ty = 2;
-      }
-      else if (pseg.y < segy)
-      {
-        // Down
-        tx = 4;
-        ty = 3;
-      }
-      else if (pseg.x < segx)
-      {
-        // Left
-        tx = 3;
-        ty = 3;
-      }
+      // Right
+      tx = 4;
+      ty = 0;
     }
-    else
+    else if (segy < nseg.y)
     {
-      // Body; Determine the correct image
-      auto pseg = snakeBody[i - 1]; // Previous segment
-      auto nseg = snakeBody[i + 1]; // Next segment
-      if (pseg.x < segx && nseg.x > segx || nseg.x < segx && pseg.x > segx)
-      {
-        // Horizontal Left-Right
-        tx = 1;
-        ty = 0;
-      }
-      else if (pseg.x < segx && nseg.y > segy || nseg.x < segx && pseg.y > segy)
-      {
-        // Angle Left-Down
-        tx = 2;
-        ty = 2;
-      }
-      else if (pseg.y < segy && nseg.y > segy || nseg.y < segy && pseg.y > segy)
-      {
-        // Vertical Up-Down
-        tx = 2;
-        ty = 1;
-      }
-      else if (pseg.y < segy && nseg.x < segx || nseg.y < segy && pseg.x < segx)
-      {
-        // Angle Top-Left
-        tx = 2;
-        ty = 0;
-      }
-      else if (pseg.x > segx && nseg.y < segy || nseg.x > segx && pseg.y < segy)
-      {
-        // Angle Right-Up
-        tx = 0;
-        ty = 0;
-      }
-      else if (pseg.y > segy && nseg.x > segx || nseg.y > segy && pseg.x > segx)
-      {
-        // Angle Down-Right
-        tx = 0;
-        ty = 1;
-      }
+      // Down
+      tx = 4;
+      ty = 1;
     }
-
-    float tx1 = tx * charWidth;
-    float ty1 = ty * charHeight;
-    float tx2 = tx1 + charWidth;
-    float ty2 = ty1 + charHeight;
-
-    float vertices[] = {
-        segment.x, segment.y, tx1, ty2,
-        segment.x + snakeWidth, segment.y, tx2, ty2,
-        segment.x + snakeWidth, segment.y + snakeHeight, tx2, ty1,
-        segment.x, segment.y + snakeHeight, tx1, ty1};
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    GLint posLoc = glGetAttribLocation(program, "aPosition");
-    GLint texLoc = glGetAttribLocation(program, "aTexCoord");
-
-    glEnableVertexAttribArray(posLoc);
-    glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(texLoc);
-    glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
-
-    GLint colorLoc = glGetUniformLocation(program, "uColor");
-    glUniform3f(colorLoc, 1.0f, 1.0f, 1.0f);
-
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-
-    glDisableVertexAttribArray(posLoc);
-    glDisableVertexAttribArray(texLoc);
-    glDeleteBuffers(1, &vbo);
+    else if (segx < nseg.x)
+    {
+      // Left
+      tx = 3;
+      ty = 1;
+    }
   }
+  else if (i == snakeBody.size() - 1)
+  {
+    // Tail; Determine the correct image
+    auto pseg = snakeBody[i - 1]; // Prev segment
+    if (pseg.y > segy)
+    {
+      // Up
+      tx = 3;
+      ty = 2;
+    }
+    else if (pseg.x > segx)
+    {
+      // Right
+      tx = 4;
+      ty = 2;
+    }
+    else if (pseg.y < segy)
+    {
+      // Down
+      tx = 4;
+      ty = 3;
+    }
+    else if (pseg.x < segx)
+    {
+      // Left
+      tx = 3;
+      ty = 3;
+    }
+  }
+  else
+  {
+    // Body; Determine the correct image
+    auto pseg = snakeBody[i - 1]; // Previous segment
+    auto nseg = snakeBody[i + 1]; // Next segment
+    if (pseg.x < segx && nseg.x > segx || nseg.x < segx && pseg.x > segx)
+    {
+      // Horizontal Left-Right
+      tx = 1;
+      ty = 0;
+    }
+    else if (pseg.x < segx && nseg.y > segy || nseg.x < segx && pseg.y > segy)
+    {
+      // Angle Left-Down
+      tx = 2;
+      ty = 2;
+    }
+    else if (pseg.y < segy && nseg.y > segy || nseg.y < segy && pseg.y > segy)
+    {
+      // Vertical Up-Down
+      tx = 2;
+      ty = 1;
+    }
+    else if (pseg.y < segy && nseg.x < segx || nseg.y < segy && pseg.x < segx)
+    {
+      // Angle Top-Left
+      tx = 2;
+      ty = 0;
+    }
+    else if (pseg.x > segx && nseg.y < segy || nseg.x > segx && pseg.y < segy)
+    {
+      // Angle Right-Up
+      tx = 0;
+      ty = 0;
+    }
+    else if (pseg.y > segy && nseg.x > segx || nseg.y > segy && pseg.x > segx)
+    {
+      // Angle Down-Right
+      tx = 0;
+      ty = 1;
+    }
+  }
+
+  float tx1 = tx * charWidth;
+  float ty1 = ty * charHeight;
+  float tx2 = tx1 + charWidth;
+  float ty2 = ty1 + charHeight;
+
+  float vertices[] = {
+      x, y, tx1, ty2,
+      x + snakeWidth, y, tx2, ty2,
+      x + snakeWidth, y + snakeHeight, tx2, ty1,
+      x, y + snakeHeight, tx1, ty1};
+
+  GLuint vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+  GLint posLoc = glGetAttribLocation(program, "aPosition");
+  GLint texLoc = glGetAttribLocation(program, "aTexCoord");
+
+  glEnableVertexAttribArray(posLoc);
+  glVertexAttribPointer(posLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+  glEnableVertexAttribArray(texLoc);
+  glVertexAttribPointer(texLoc, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+
+  GLint colorLoc = glGetUniformLocation(program, "uColor");
+  glUniform3f(colorLoc, 1.0f, 1.0f, 1.0f);
+
+  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+  glDisableVertexAttribArray(posLoc);
+  glDisableVertexAttribArray(texLoc);
+  glDeleteBuffers(1, &vbo);
 }
 void drawTexturedFruit(GLuint program, GLfloat x, GLfloat y)
 {
@@ -669,28 +575,20 @@ void drawTexturedFruit(GLuint program, GLfloat x, GLfloat y)
 // GLUT callbacks
 GLuint program;
 
-void drawFruit(float x, float y)
-{
-  drawSquare(program, x, y, snakeWidth, 1.0f, 1.0f, 0.0f);
-}
-void drawSnakeSegment(float x, float y)
-{
-  drawSquare(program, x, y, snakeWidth, 1.0f, 1.0f, 1.0f);
-}
 void drawSnake()
 {
   GLuint snakeTexture = loadTexture(snakeTexturePath);
-  drawTexturedSquare(program, snakeTexture);
-  // for (const auto &segment : snakeBody)
-  // {
-  //   drawSquare(program, segment.x, segment.y, snakeWidth, 1.0f, 1.0f, 1.0f);
-  // }
+  for (size_t i = 0; i < snakeBody.size(); ++i)
+  {
+    const auto segment = snakeBody[i];
+    drawTexturedSquare(program, snakeTexture, segment.x, segment.y, i);
+  }
 }
 
 void drawScore()
 {
   GLuint fontTexture = loadTexture(fontTexturePath);
-  renderText(program, fontTexture, "SCORE:" + to_string(playerScore), -0.9f, 0.85f, 0.07f, 0.0f, 0.0f, 0.0f, false);
+  renderText(program, fontTexture, "SCORE:" + to_string(playerScore), -0.9f, 0.85f, 0.07f, 1.0f, 1.0f, 1.0f, false);
 }
 
 void drawGameover()
@@ -701,17 +599,15 @@ void drawGameover()
     gameOverSoundPlayed = true;
   }
   GLuint fontTexture = loadTexture(fontTexturePath);
-  renderText(program, fontTexture, "GAME OVER!", 0.0f, 0.7f, 0.13f, 0.0f, 0.0f, 0.0f, true);
-  renderText(program, fontTexture, "SCORE:" + to_string(playerScore), 0.0f, 0.58f, 0.1f, 0.0f, 0.0f, 0.0f, true);
-  renderText(program, fontTexture, "\"SPACE\" TO RESTART", 0.0f, 0.48f, 0.08f, 0.0f, 0.0f, 0.0f, true);
+  renderText(program, fontTexture, "GAME OVER!", 0.0f, 0.7f, 0.13f, 1.0f, 1.0f, 1.0f, true);
+  renderText(program, fontTexture, "SCORE:" + to_string(playerScore), 0.0f, 0.58f, 0.1f, 1.0f, 1.0f, 1.0f, true);
+  renderText(program, fontTexture, "\"SPACE\" TO RESTART", 0.0f, 0.48f, 0.08f, 1.0f, 1.0f, 1.0f, true);
 }
 
 void display()
 {
-  glClearColor(0.01f, 0.75f, 0.01f, 1.0f);
+  glClearColor(0.01f, 0.01f, 0.01f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   GLint useFontTextureLoc = glGetUniformLocation(program, "uUseFontTexture");
   glUniform1i(useFontTextureLoc, 1);

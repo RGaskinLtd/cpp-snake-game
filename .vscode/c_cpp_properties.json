@@ -6,6 +6,7 @@
                 "/usr/local/include",
                 "/usr/local/Cellar/emscripten/main/system/include",
                 "/usr/local/Cellar/emscripten/main/system/include/GL",
+                "/usr/local/Cellar/emscripten/main/system/include/gl2d/include",
                 "/usr/local/Cellar/emscripten/main/system/include/stb",
                 "/usr/local/Cellar/emscripten/main/system/include/stb"
             ],
