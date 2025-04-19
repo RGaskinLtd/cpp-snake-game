@@ -1,5 +1,7 @@
 # C++ Snake Game Project & Emscripten For WASM
 
+![screenshot of WASM web version](wasm-screenshot.png)
+
 ## TODO setup guide
 
 > Advisement Note: this codebase was setup for Mac M1/M2 (silicon)
